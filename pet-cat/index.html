@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#f3e7d8" />
+    <meta
+      name="description"
+      content="little paws - a quiet, interactive moment with Mochi, a hand-animated 3D cat you can pet."
+    />
+    <title>little paws — a little moment of calm</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./css/style.css" />
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./vendor/three.module.min.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <noscript>
+      <div class="noscript">
+        <h1>little paws</h1>
+        <p>This experience needs JavaScript to bring Mochi to life.</p>
+      </div>
+    </noscript>
+
+    <main id="app" class="app">
+      <div class="stage">
+        <canvas id="scene" class="scene" aria-label="An interactive 3D cat named Mochi"></canvas>
+        <div class="stage__glow" aria-hidden="true"></div>
+        <div class="stage__vignette" aria-hidden="true"></div>
+        <div class="stage__grain" aria-hidden="true"></div>
+      </div>
+
+      <div class="ui" id="ui">
+        <header class="brand">
+          <div class="brand__mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" width="26" height="26" fill="none">
+              <path
+                d="M11 12.4c-1.6-1.3-2.9-4-2.2-6.2.6-1.9 2.5-1.9 3.6-.6 1 1.2 1.6 2.9 1.9 4.4"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+              />
+              <path
+                d="M21 12.4c1.6-1.3 2.9-4 2.2-6.2-.6-1.9-2.5-1.9-3.6-.6-1 1.2-1.6 2.9-1.9 4.4"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+              />
+              <path
+                d="M16 24.4c-4.6 0-7.6-3-7.6-7 0-3.9 3.4-7 7.6-7s7.6 3.1 7.6 7c0 4-3 7-7.6 7Z"
+                stroke="currentColor"
+                stroke-width="1.6"
+              />
+              <path d="M13.2 16.1h.02M18.8 16.1h.02" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+              <path d="M14.6 19.2c.8.7 2 .7 2.8 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+          </div>
+          <div class="brand__text">
+            <h1 class="brand__title">little paws</h1>
+            <p class="brand__subtitle">A little moment of calm.</p>
+          </div>
+        </header>
+
+        <div class="hint" id="hint">
+          <span class="hint__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+              <path
+                d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1V4.5a1.5 1.5 0 0 1 3 0V11m0-.5V6a1.5 1.5 0 0 1 3 0v6.5c0 3.9-2.6 6.5-6.2 6.5S9.3 17 8.3 14.4l-2-5a1.5 1.5 0 0 1 2.6-1.4L9 11Z"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          <span class="hint__text" id="hint-text">Move your hand to pet Mochi</span>
+        </div>
+
+        <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+        <nav class="dock" aria-label="Experience controls">
+          <button class="dock__btn" id="btn-sound" type="button" aria-pressed="false" title="Sound off">
+            <span class="ico" data-ico="sound-off"></span>
+            <span class="sr-only">Toggle sound</span>
+          </button>
+
+          <button class="dock__btn" id="btn-cats" type="button" aria-expanded="false" title="Choose a cat">
+            <span class="ico" data-ico="paw"></span>
+            <span class="sr-only">Choose a cat</span>
+          </button>
+
+          <button class="dock__btn" id="btn-recenter" type="button" title="Recenter the camera">
+            <span class="ico" data-ico="target"></span>
+            <span class="sr-only">Recenter camera</span>
+          </button>
+        </nav>
+
+        <aside class="shelf" id="shelf" hidden aria-label="Choose a cat">
+          <p class="shelf__title">Choose a cat</p>
+          <ul class="shelf__list" id="shelf-list"></ul>
+        </aside>
+      </div>
+    </main>
+
+    <div class="loader" id="loader" aria-live="polite">
+      <div class="loader__inner">
+        <div class="loader__paw" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="46" height="46" fill="none">
+            <path
+              d="M20 27c-3.2-2.6-5.6-8-4.2-12.3C17 10.9 20.6 11 22.8 13.5c2 2.3 3.2 5.7 3.7 8.6"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+            />
+            <path
+              d="M44 27c3.2-2.6 5.6-8 4.2-12.3C47 10.9 43.4 11 41.2 13.5c-2 2.3-3.2 5.7-3.7 8.6"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+            />
+            <path
+              d="M32 52c-9.4 0-15.4-6-15.4-14.2 0-7.9 6.9-14.2 15.4-14.2s15.4 6.3 15.4 14.2C47.4 46 41.4 52 32 52Z"
+              stroke="currentColor"
+              stroke-width="3"
+            />
+          </svg>
+        </div>
+        <p class="loader__title">little paws</p>
+        <p class="loader__sub" id="loader-sub">Waking Mochi up…</p>
+        <div class="loader__bar"><span id="loader-fill"></span></div>
+      </div>
+    </div>
+
+    <div class="fallback" id="fallback" hidden>
+      <div class="fallback__card">
+        <div class="fallback__art" aria-hidden="true">
+          <svg viewBox="0 0 120 96" width="180" height="144" fill="none">
+            <ellipse cx="60" cy="82" rx="42" ry="7" fill="#c9b6a0" opacity=".55" />
+            <path
+              d="M60 12c-4 0-7 3-7 7v9c0 3-2 5-5 5h-9c-4 0-7 3-7 7v26c0 10 12 18 28 18s28-8 28-18V47c0-4-3-7-7-7h-9c-3 0-5-2-5-5v-9c0-4-3-7-7-7Z"
+              fill="#e2d2bd"
+            />
+            <path d="M46 40c1.6-3.4 1.2-8.6-1.4-11.2-2.4-2.4-5.6-1-6.2 2-.6 2.9.6 6.6 2 9.2Z" fill="#e2d2bd" />
+            <path d="M74 40c-1.6-3.4-1.2-8.6 1.4-11.2 2.4-2.4 5.6-1 6.2 2 .6 2.9-.6 6.6-2 9.2Z" fill="#e2d2bd" />
+            <path d="M46 62c0 7.7 6.3 14 14 14s14-6.3 14-14" stroke="#a98d6f" stroke-width="2.4" />
+            <circle cx="48" cy="52" r="3.4" fill="#4a3b2e" />
+            <circle cx="72" cy="52" r="3.4" fill="#4a3b2e" />
+            <path d="M56 62h8l-4 4-4-4Z" fill="#d98f86" />
+            <path d="M58 66c0 2 1 3 2 3s2-1 2-3" stroke="#7d6350" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+        </div>
+        <h2 class="fallback__title">Mochi is napping</h2>
+        <p class="fallback__text" id="fallback-text">
+          The 3D scene could not start on this device. Try a newer browser, or enable hardware
+          acceleration / WebGL.
+        </p>
+        <button class="btn btn--ghost" id="fallback-retry" type="button">Try again</button>
+      </div>
+    </div>
+
+    <script>
+      // Flag WebGL support early so the fallback can render without the module graph.
+      (function () {
+        try {
+          var canvas = document.createElement('canvas');
+          var ok =
+            !!(window.WebGLRenderingContext &&
+              (canvas.getContext('webgl2') || canvas.getContext('webgl')));
+          window.__LITTLE_PAWS_WEBGL__ = ok;
+        } catch (e) {
+          window.__LITTLE_PAWS_WEBGL__ = false;
+        }
+      })();
+    </script>
+    <script type="module" src="./js/main.js"></script>
+  </body>
+</html>
